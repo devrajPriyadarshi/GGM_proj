@@ -4,15 +4,7 @@ import cv2
 np.random.seed(0)
 
 def Gibbs_sampling_denoise(data, width, height, iteration=2, J=1, std=1):
-    '''
-    :param data: matrix includes [1 or -1]
-    :param width: image's width
-    :param height: image's height
-    :param iteration: number of sampling times
-    :param J: coupling strength
-    :param std: std of noise norm
-    :return: updated data
-    '''
+
     def matrixUpdate(mask):
         # left neighbors
         left_matrix = data.copy()
@@ -52,26 +44,16 @@ def Gibbs_sampling_denoise(data, width, height, iteration=2, J=1, std=1):
     return data
 
 def Process(data, iteration, J, std):
-    '''
-    :param data: image matrix includes [0 or 255]
-    :param iteration: number of sampling
-    :param J: coupling strength
-    :param std: std of noise norm
-    :return: save the denoised image
-    '''
+
     width = data.shape[1]
     height = data.shape[0]
     data[data == 255] = 1
     data[data == 0] = -1
     denoised_data = Gibbs_sampling_denoise(data, width, height, iteration=iteration, J=J, std=std)
-    print("denoising is done.")
     denoised_data[denoised_data == 1] = 255
     denoised_data[denoised_data == -1] = 0
-    print("start write into image......")
-    cv2.imwrite('data/denoised-GMM-GS.png', denoised_data.astype(np.uint8))
-    print("succeed in saving denoised image into \"./data/denoised-GS.png\"")
+    cv2.imwrite('gibbs.png', denoised_data.astype(np.uint8))
 
 if __name__ == "__main__":
-    image = cv2.imread("data/noisy.png", cv2.IMREAD_GRAYSCALE)
-    print("noise image is loaded.")
-    Process(image.astype(np.float16), iteration=10, J=1, std=3)
+    image = cv2.imread("noisy_thresholded_image.png", cv2.IMREAD_GRAYSCALE)
+    Process(image.astype(np.float16), iteration=1, J=1, std=3)

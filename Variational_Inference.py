@@ -4,21 +4,10 @@ import cv2
 np.random.seed(0)
 
 def getEntropy(prob):
-    # entropy of data[0][0] = - prob[0][0] * np.log(prob[0][0]) - (1-prob[0][0]) * np.log(1-prob[0][0])
     return -np.mean(prob * np.log(prob + 1e-10) + (1 - prob) * np.log(1 - prob + 1e-10))
 
 def VAriationalInference_denoise_quickly(data, prob, mu, width, height, episolon=1e-3, J=1, std=1):
-    '''
-    :param data: matrix includes [1 or -1]
-    :param prob: probability of get 1. eg. data[0][0] = 0.8 means 80% will get 1
-    :param mu: mu of data
-    :param width: image's width
-    :param height: image's height
-    :param episolon: judge whether to get out of the iterations
-    :param J: coupling strength
-    :param std: std of noise norm
-    :return: updated data
-    '''
+
     def matrixUpdate(mask):
         # left neighbors
         left_matrix = mu.copy()
@@ -68,13 +57,7 @@ def VAriationalInference_denoise_quickly(data, prob, mu, width, height, episolon
     return data
 
 def Process(data, episolon, J, std):
-    '''
-    :param data: matrix includes [0 or 255]
-    :param episolon: judge whether to get out of the iterations
-    :param J: coupling strength
-    :param std: std of noise norm
-    :return: save the denoised image
-    '''
+
     width = data.shape[1]
     height = data.shape[0]
     data[data == 255] = 1
@@ -84,14 +67,10 @@ def Process(data, episolon, J, std):
     # initialize the mu as the same as data
     mu = data.copy()
     denoised_data = VAriationalInference_denoise_quickly(data, prob, mu, width, height, episolon=episolon, J=J, std=std)
-    print("denoising is done.")
     denoised_data[denoised_data == 1] = 255
     denoised_data[denoised_data == -1] = 0
-    print("start write into image......")
-    cv2.imwrite('data/denoised-GMM-VI.png', denoised_data.astype(np.uint8))
-    print("succeed in saving denoised image into \"./data/denoised-VI.png\"")
+    cv2.imwrite('VI.png', denoised_data.astype(np.uint8))
 
 if __name__ == "__main__":
-    image = cv2.imread("data/noisy.png", cv2.IMREAD_GRAYSCALE)
-    print("noise image is loaded.")
+    image = cv2.imread("noisy_thresholded_image.png", cv2.IMREAD_GRAYSCALE)
     Process(image.astype(np.float32), episolon=1e-4, J=1, std=1)
